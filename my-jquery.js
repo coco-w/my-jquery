@@ -11,6 +11,9 @@
             //null false之类
             if(!selector) {
                 return this
+                //funciton
+            }else if(jquery.isFunction(selector)){
+                jquery.isReady(selector)
                 //字符串
             }else if(jquery.isString(selector)) {
                 //代码片段
@@ -48,6 +51,40 @@
                 this.length = 1
             }
             return this
+        },
+        jquery: '1.1.0',
+        length: 0,
+        selector: '',
+        push: [].push,
+        sort: [].sort,
+        splice: [].splice,
+        toArray: function() {
+            return [].slice.apply(this)
+        },
+        get: function(num) {
+            if(arguments.length == 0) {
+                return this.toArray()
+            }else if(num >= 0) {
+                return this[num]
+            }else if(num < 0) {
+                return this[this.length + num]
+            }
+        },
+        eq: function(num) {
+            if(arguments.length == 0) {
+                return new jquery()
+            }else{
+                return jquery(this.get(num))
+            }
+        },
+        first: function() {
+            return this.eq(0)
+        },
+        last: function() {
+            return this.eq(-1)
+        },
+        each: function(callback) {
+            return jquery.each(this, callback)
         }
     }
     jquery.extend = jquery.prototype.extend = function(obj) {
@@ -81,7 +118,10 @@
         isArray : function(arr) {
             return jquery.isObject(arr) && length in arr && !jquery.isWindow(arr)
         },
-        ready : function(fn) {
+        isFunction : function(sel) {
+            return typeof sel === 'function'
+        },
+        isReady : function(fn) {
             if(document.readyState == 'complete') {
                 fn()
           }else if(document.addEventListener) {
@@ -96,6 +136,50 @@
               })
           }
         },
+        each: function(obj, callback) {
+            if(jquery.isArray(obj)) {
+                for (var i = 0; i < obj.length; i++) {
+                    var res = callback.call(obj[i], i, obj[i])
+                    if(res == true) {
+                        continue
+                    }else if(res == false) {
+                        break
+                    }
+                }
+            }else if(jquery.isObject(obj)) {
+                for (var key in obj) {
+                    var res = callback.call(obj[key], key, obj[key])
+                }
+            }
+            return obj
+        },
+        map: function(obj, callback) {
+            var res = []
+            if(jquery.isArray(obj)) {
+                for (var i = 0; i < obj.length; i++) {
+                    var temp = callback(i, obj[i])
+                    if(temp) {
+                        res.push(temp)
+                    }
+                }
+            }else if(jquery.isObject(obj)) {
+                for (var key in obj) {
+                    var temp = callback(key, ojb[key])
+                    if(temp) {
+                        res.push(temp)
+                    }
+                }
+            }
+            return res
+        }
+    })
+    jquery.prototype.extend({
+        empty: function() {
+            this.each(function(key, value) {
+                value.innerHTML = ''
+            })
+            return this
+        }
     })
     
     jquery.prototype.inti.prototype = jquery.prototype
